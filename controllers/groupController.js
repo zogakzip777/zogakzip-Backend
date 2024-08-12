@@ -91,9 +91,27 @@ exports.verifyGroupPassword = async (req, res) => {
 };
 
 exports.likeGroup = async (req, res) => {
-  
+  const { groupId } = req.params;
+  try {
+    const group = await Group.findByPk(groupId);
+    group.likeCount++;
+
+    await group.save();
+    res.send({ message: "그룹 공감하기 성공" });
+  } catch (error) {
+    res.status(404).send({ message: "존재하지 않습니다" });
+  }
 };
 
 exports.isGroupPublic = async (req, res) => {
+  const { groupId } = req.params;
   
+  try {
+    const group = await Group.findByPk(groupId, {
+      attributes: ['id', 'isPublic']
+    });
+    res.send(group);
+  } catch (error) {
+    res.status(400).send({ message: "잘못된 요청입니다" });
+  }
 };
