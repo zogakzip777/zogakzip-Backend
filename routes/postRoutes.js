@@ -4,10 +4,10 @@ const postController = require('../controllers/postController');
 const commentController = require('../controllers/commentController');
 
 // 게시글 수정
-router.put('/:postId', authMiddleware, postController.updatePost);
+router.put('/:postId', postController.updatePost);
 
 // 게시글 삭제
-router.delete('/:postId', authMiddleware, postController.deletePost);
+router.delete('/:postId', postController.deletePost);
 
 // 게시글 상세 정보 조회
 router.get('/:postId', postController.getPostById);
