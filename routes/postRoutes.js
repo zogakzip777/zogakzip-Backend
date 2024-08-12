@@ -19,7 +19,7 @@ router.post('/:postId/verify-password', postController.verifyPostPassword);
 router.post('/:postId/like', postController.likePost);
 
 // 게시글 공개 여부 확인
-router.post('/:postId/is-public', postController.isPostPublic);
+router.get('/:postId/is-public', postController.isPostPublic);
 
 // 댓글 등록
 router.post('/:postId/comments', commentController.createComment);
