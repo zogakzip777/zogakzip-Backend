@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const path = require('path');
 dotenv.config();
 
 const groupRoutes = require('./routes/groupRoutes');
@@ -10,6 +11,8 @@ const imageRoutes = require('./routes/imageRoutes');
 const app = express();
 
 app.use(express.json());
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/api/groups', groupRoutes);
 app.use('/api/posts', postRoutes);
