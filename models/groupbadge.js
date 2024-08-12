@@ -5,8 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class GroupBadge extends Model {
     static associate(models) {
-      GroupBadge.belongsTo(models.Group, { foreignKey: 'groupId', targetKey: id });
-      GroupBadge.belongsTo(models.Badge, { foreignKey: 'badgeId', targetKey: id });
+      GroupBadge.belongsTo(models.Group, { foreignKey: 'groupId', targetKey: 'id' });
+      GroupBadge.belongsTo(models.Badge, { foreignKey: 'badgeId', targetKey: 'id' });
     }
   }
   GroupBadge.init({

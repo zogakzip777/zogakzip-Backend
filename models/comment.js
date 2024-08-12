@@ -5,7 +5,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class Comment extends Model {
     static associate(models) {
-      Comment.belongsTo(models.Post, { foreignKey: 'postId', targetKey: id });
+      Comment.belongsTo(models.Post, { foreignKey: 'postId', targetKey: 'id' });
     }
   }
   Comment.init({

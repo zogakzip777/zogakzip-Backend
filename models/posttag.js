@@ -5,8 +5,8 @@ const {
 module.exports = (sequelize, DataTypes) => {
   class PostTag extends Model {
     static associate(models) {
-      PostTag.belongsTo(models.Post, { foreignKey: 'postId', targetKey: id });
-      PostTag.belongsTo(models.Tag, { foreignKey: 'tagId', targetKey: id });
+      PostTag.belongsTo(models.Post, { foreignKey: 'postId', targetKey: 'id' });
+      PostTag.belongsTo(models.Tag, { foreignKey: 'tagId', targetKey: 'id' });
     }
   }
   PostTag.init({
