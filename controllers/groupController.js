@@ -1,5 +1,6 @@
 const db = require('../models/index.js');
 const { Group, GroupBadge, Badge, Post } = db;
+const { hashPassword, comparePassword } = require('../utils/passwordUtils.js');
 
 const getGroupById = async (groupId) => {
   try {
@@ -51,12 +52,17 @@ const getPostCountById = async (groupId) => {
 }
 
 exports.createGroup = async (req, res) => {
-  const group = req.body;
-
+  const { name, password, imageUrl, isPublic, introduction } = req.body;
   try {
-    const newGroup = await Group.create(group);
-    const groupWithDetails = await getGroupById(newGroup.id);
-
+    const hashedPassword = await hashPassword(password);
+    const group = await Group.create({
+      name,
+      password: hashedPassword,
+      imageUrl,
+      isPublic,
+      introduction
+    });
+    const groupWithDetails = await getGroupById(group.id);
     res.status(201).send(groupWithDetails);
   } catch(e) {
     res.status(404).send({ message: "잘못된 요청입니다" });
@@ -72,7 +78,6 @@ exports.updateGroup = async (req, res) => {
 };
 
 exports.deleteGroup = async (req, res) => {
-  
 };
 
 exports.getGroup = async (req, res) => {
