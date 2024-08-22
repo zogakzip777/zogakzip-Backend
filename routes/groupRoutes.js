@@ -16,7 +16,7 @@ router.put('/:groupId', groupController.updateGroup);
 router.delete('/:groupId', groupController.deleteGroup);
 
 // 그룹 상세 정보 조회
-router.get('/:groupId', groupController.getGroupById);
+router.get('/:groupId', groupController.getGroup);
 
 // 그룹 조회 권한 확인
 router.post('/:groupId/verify-password', groupController.verifyGroupPassword);
