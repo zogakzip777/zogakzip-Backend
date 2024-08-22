@@ -3,12 +3,6 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('GroupBadges', {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
-      },
       groupId: {
         type: Sequelize.UUID,
         references: {
@@ -16,7 +10,8 @@ module.exports = {
           key: 'id'
         },
         onDelete: 'CASCADE',
-        allowNull: false
+        allowNull: false,
+        primaryKey: true
       },
       badgeId: {
         type: Sequelize.INTEGER,
@@ -25,7 +20,8 @@ module.exports = {
           key: 'id'
         },
         onDelete: 'CASCADE',
-        allowNull: false
+        allowNull: false,
+        primaryKey: true
       }
     });
   },
