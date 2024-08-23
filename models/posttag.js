@@ -10,12 +10,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   PostTag.init({
-    id: {
-      allowNull: false,
-      autoIncrement: true,
-      primaryKey: true,
-      type: DataTypes.INTEGER
-    },
     postId: {
       type: DataTypes.UUID,
       references: {
@@ -23,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       },
       onDelete: 'CASCADE',
-      allowNull: false
+      allowNull: false,
+      primaryKey: true
     },
     tagId: {
       type: DataTypes.INTEGER,
@@ -32,7 +27,8 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       },
       onDelete: 'CASCADE',
-      allowNull: false
+      allowNull: false,
+      primaryKey: true
     }
   }, {
     sequelize,
