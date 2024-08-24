@@ -1,7 +1,7 @@
 const db = require('../models/index.js');
 const { Group, GroupBadge, Badge, Post } = db;
 const { hashPassword, comparePassword } = require('../utils/passwordUtils.js');
-const { Op, fn, col } = require('sequelize');
+const { Op, literal } = require('sequelize');
 
 const getGroupById = async (groupId) => {
   try {
@@ -86,7 +86,7 @@ exports.getGroups = async (req, res) => {
       mostBadge: [['badgeCount', 'DESC']]
     };
 
-    const data = await Group.findAll({
+    const { count: totalItemCount, rows: data } = await Group.findAndCountAll({
       where: {
         isPublic,
         name: {
@@ -102,27 +102,30 @@ exports.getGroups = async (req, res) => {
         'imageUrl',
         'isPublic',
         'likeCount',
-        [fn('COUNT', col('GroupBadges.id')), 'badgeCount'],
-        [fn('COUNT', col('Posts.id')), 'postCount'],
         'createdAt',
         'introduction',
+        [
+          literal(`(
+            SELECT COUNT(*)
+            FROM GroupBadges AS groupBadge
+            WHERE groupBadge.groupId = Group.id
+          )`),
+          'badgeCount'
+        ],
+        [
+          literal(`(
+            SELECT COUNT(*)
+            FROM Posts AS post
+            WHERE post.groupId = Group.id
+          )`),
+          'postCount'
+        ]
       ],
-      include: [
-        {
-          model: GroupBadge,
-          attributes: []
-        },
-        {
-          model: Post,
-          attributes: []
-        }
-      ],
-      group: ['Group.id'],
       subQuery: false
     });
 
     const currentPage = parseInt(page);
-    const totalItemCount = await Group.count();
+    //const totalItemCount = await Group.count();
     const totalPages = Math.ceil(totalItemCount/limit);
 
     const response = {
@@ -134,6 +137,7 @@ exports.getGroups = async (req, res) => {
 
     res.send(response);
   } catch (error) {
+    console.error(error.message)
     res.status(400).send({ message: "잘못된 요청입니다" });
   }
 };

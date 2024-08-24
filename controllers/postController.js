@@ -2,7 +2,7 @@ const db = require('../models/index.js');
 const { Post, Comment, Group, PostTag, Tag } = db;
 const { comparePassword, hashPassword } = require('../utils/passwordUtils'); // 비밀번호 유틸리티 불러오기
 const { createTags, updateTags } = require('../services/tagService.js');
-const { Op, fn, col } = require('sequelize');
+const { Op, literal } = require('sequelize');
 
 const getPostDetailsById = async (postId) => {
   try {
@@ -154,7 +154,7 @@ exports.getPosts = async (req, res) => {
       mostLiked: [['likeCount', 'DESC']]
     };
 
-    const posts = await Post.findAll({
+    const { count: totalItemCount, rows: posts } = await Post.findAndCountAll({
       order: sortOptions[sortBy],
       offset,
       limit,
@@ -167,7 +167,14 @@ exports.getPosts = async (req, res) => {
         'moment',
         'isPublic',
         'likeCount',
-        [fn('COUNT', col('Comments.id')), 'commentCount'],
+        [
+          literal(`(
+            SELECT COUNT(*)
+            FROM Comments AS comment
+            WHERE comment.postId = Post.id
+          )`),
+          'commentCount'
+        ],
         'createdAt'
       ],
       include: [
@@ -186,10 +193,6 @@ exports.getPosts = async (req, res) => {
             }
           ],
           required: false
-        },
-        {
-          model: Comment,
-          attributes: []
         }
       ],
       where: {
@@ -200,46 +203,15 @@ exports.getPosts = async (req, res) => {
         isPublic,
         groupId
       },
-      group: ['Post.id'],
       subQuery: false
     });
 
+    const currentPage = parseInt(page);
+    const totalPages = Math.ceil(totalItemCount/limit);
     const data = await Promise.all(posts.map(async (post) => {
       const tags = await getTagsByPostId(post.id);
       return { ...post.dataValues, tags };
     }));
-
-    const currentPage = parseInt(page);
-    const totalItemCount = await Post.count({
-      where: {
-        [Op.or]: [
-          { title: { [Op.like]: `%${keyword}%` } },
-          { '$PostTags.postId$': { [Op.ne]: null } }
-        ],
-        isPublic
-      },
-      include: [
-        {
-          model: PostTag,
-          attributes: [],
-          include: [
-            {
-              model: Tag,
-              attributes: [],
-              where: {
-                name: {
-                  [Op.like]: `${keyword}`
-                }
-              }
-            }
-          ],
-          required: false
-        }
-      ],
-      attributes: []
-    });
-
-    const totalPages = Math.ceil(totalItemCount/limit);
 
     const response = {
       currentPage,
