@@ -3,12 +3,6 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('PostTags', {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
-      },
       postId: {
         type: Sequelize.UUID,
         references: {
@@ -16,7 +10,8 @@ module.exports = {
           key: 'id'
         },
         onDelete: 'CASCADE',
-        allowNull: false
+        allowNull: false,
+        primaryKey: true
       },
       tagId: {
         type: Sequelize.INTEGER,
@@ -25,7 +20,8 @@ module.exports = {
           key: 'id'
         },
         onDelete: 'CASCADE',
-        allowNull: false
+        allowNull: false,
+        primaryKey: true
       }
     });
   },

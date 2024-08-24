@@ -42,7 +42,7 @@ module.exports = {
         allowNull: false
       },
       moment: {
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         allowNull: false
       },
       isPublic: {
