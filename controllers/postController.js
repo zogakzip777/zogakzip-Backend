@@ -3,6 +3,7 @@ const { Post, Comment, Group, PostTag, Tag } = db;
 const { comparePassword, hashPassword } = require('../utils/passwordUtils'); // 비밀번호 유틸리티 불러오기
 const { createTags, updateTags } = require('../services/tagService.js');
 const { Op, literal } = require('sequelize');
+const { checkConsecutiveDays, checkPostCount, checkPostLikeCount, checkGroupLikeCount } = require('../services/badgeService.js');
 
 const getPostDetailsById = async (postId) => {
   try {
@@ -115,8 +116,11 @@ exports.createPost = async (req, res) => {
     // 태그 생성
     await createTags(tags, post.id);
 
-    const postWithDetails = await getPostDetailsById(post.id);
+    // 배지 조건 확인
+    await checkConsecutiveDays(groupId);
+    await checkPostCount(groupId);
 
+    const postWithDetails = await getPostDetailsById(post.id);
     // 성공 응답 반환
     return res.status(200).send(postWithDetails);
   } catch (error) {
@@ -369,6 +373,9 @@ exports.likePost = async (req, res) => {
 
     // 변경된 게시글 저장
     await post.save();
+
+    // 배지 조건 확인
+    await checkPostLikeCount(postId);
 
     return res.status(200).json({ message: '게시글 공감하기 성공' });
   } catch (error) {

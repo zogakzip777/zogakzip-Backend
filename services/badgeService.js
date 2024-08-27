@@ -71,18 +71,13 @@ const checkGroupLikeCount = async (groupId) => {
   }
 };
 
-const checkPostLikeCount = async (groupId) => {
-  const posts = await Post.findAll({
-    where: { 
-      groupId,
-      likeCount: {
-        [Op.gte]: 10000
-      }
-    }
+const checkPostLikeCount = async (postId) => {
+  const posts = await Post.findByPk(postId, {
+    attributes: ['groupId', 'likeCount']
   });
   
-  if (posts.length > 0) {
-    await awardBadge(groupId, BADGE_POST_LIKE_COUNT_10000);
+  if (posts.likeCount >= 10000) {
+    await awardBadge(posts.groupId, BADGE_POST_LIKE_COUNT_10000);
   }
 };
 
