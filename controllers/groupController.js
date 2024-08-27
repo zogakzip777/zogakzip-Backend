@@ -2,6 +2,7 @@ const db = require('../models/index.js');
 const { Group, GroupBadge, Badge, Post } = db;
 const { hashPassword, comparePassword } = require('../utils/passwordUtils.js');
 const { Op, literal } = require('sequelize');
+const { checkGroupLikeCount } = require('../services/badgeService.js');
 
 const getGroupById = async (groupId) => {
   try {
@@ -225,8 +226,8 @@ exports.likeGroup = async (req, res) => {
   try {
     const group = await Group.findByPk(groupId);
     group.likeCount++;
-
     await group.save();
+    await checkGroupLikeCount(groupId); // 배지 조건 확인
     res.status(200).send({ message: "그룹 공감하기 성공" });
   } catch (error) {
     res.status(404).send({ message: "존재하지 않습니다" });

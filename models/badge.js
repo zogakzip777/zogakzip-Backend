@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
   Badge.init({
     id: {
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER
     },
