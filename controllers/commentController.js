@@ -1,16 +1,17 @@
 const db = require("../models/index.js");
-const { Comment } = db; // 사용할 모델 불러오기
+const { Comment, Post } = db; // 사용할 모델 불러오기
 const { hashPassword, comparePassword } = require("../utils/passwordUtils"); // 비밀번호 비교 유틸리티 불러오기
+const { NotFoundError, WrongPasswordError, BadRequestError } = require('../utils/customErrors');
 
 // 댓글 등록
-exports.createComment = async (req, res) => {
+exports.createComment = async (req, res, next) => {
   const { postId } = req.params;
   const { nickname, content, password } = req.body;
 
   try {
     // 입력 유효성 검사
     if (!nickname || !content || !password) {
-      return res.status(400).json({ message: "잘못된 요청입니다" });
+      throw new BadRequestError();
     }
 
     // 비밀번호 해싱 처리
@@ -31,19 +32,22 @@ exports.createComment = async (req, res) => {
       content: comment.content,
       createdAt: comment.createdAt,
     });
-  } catch (error) {
-    console.error(`댓글 등록 중 오류 발생: ${error.message}`);
-    // 예상치 못한 서버 오류
-    return res.status(500).json({ message: "서버 오류가 발생했습니다" });
+  } catch (err) {
+    next(err);
   }
 };
 
 // 댓글 목록 조회
-exports.getComments = async (req, res) => {
+exports.getComments = async (req, res, next) => {
   const { postId } = req.params; // postId로 특정 게시글의 댓글을 조회
   const { page = 1, pageSize = 10 } = req.query; // 기본값 설정
 
   try {
+    const post = Post.findByPk(postId);
+    if (!post) {
+      throw new BadRequestError();
+    }
+
     // 페이지와 페이지당 아이템 수를 숫자로 변환
     const limit = parseInt(pageSize, 10);
     const offset = (parseInt(page, 10) - 1) * limit;
@@ -71,30 +75,34 @@ exports.getComments = async (req, res) => {
         createdAt: comment.createdAt,
       })),
     });
-  } catch (error) {
-    console.error(`댓글 목록 조회 중 오류 발생: ${error.message}`);
-    return res.status(400).json({ message: "잘못된 요청입니다" });
+  } catch (err) {
+    next(err);
   }
 };
 
 
 // 댓글 수정
-exports.updateComment = async (req, res) => {
+exports.updateComment = async (req, res, next) => {
   const { commentId } = req.params;
   const { nickname, content, password } = req.body;
 
   try {
+    // 입력 유효성 검사
+    if (!nickname || !content || !password) {
+      throw new BadRequestError();
+    }
+
     // 데이터베이스에서 해당 댓글 찾기
     const comment = await Comment.findByPk(commentId);
 
     if (!comment) {
-      return res.status(404).json({ message: "존재하지 않습니다" });
+      throw new NotFoundError();
     }
 
     // 비밀번호 확인
     const isMatch = await comparePassword(password, comment.password);
     if (!isMatch) {
-      return res.status(403).json({ message: "비밀번호가 틀렸습니다" });
+      throw new WrongPasswordError();
     }
 
     // 댓글 내용 수정
@@ -111,43 +119,41 @@ exports.updateComment = async (req, res) => {
       content: comment.content,
       createdAt: comment.createdAt,
     });
-  } catch (error) {
-    console.error(`댓글 수정 중 오류 발생: ${error.message}`);
-    return res.status(400).json({ message: "잘못된 요청입니다" });
+  } catch (err) {
+    next(err);
   }
 };
 
 
 // 댓글 삭제
-exports.deleteComment = async (req, res) => {
+exports.deleteComment = async (req, res, next) => {
   const { commentId } = req.params;
   const { password } = req.body;
 
   try {
     // 입력 유효성 검사
     if (!password) {
-      return res.status(400).json({ message: "잘못된 요청입니다" });
+      throw new BadRequestError();
     }
 
     // 데이터베이스에서 해당 댓글 찾기
     const comment = await Comment.findByPk(commentId);
 
     if (!comment) {
-      return res.status(404).json({ message: "존재하지 않습니다" });
+      throw new NotFoundError();
     }
 
     // 비밀번호 확인
     const isMatch = await comparePassword(password, comment.password);
     if (!isMatch) {
-      return res.status(403).json({ message: "비밀번호가 틀렸습니다" });
+      throw new WrongPasswordError();
     }
 
     // 댓글 삭제
     await comment.destroy();
 
     return res.status(200).json({ message: "댓글 삭제 성공" });
-  } catch (error) {
-    console.error(`댓글 삭제 중 오류 발생: ${error.message}`);
-    return res.status(500).json({ message: "서버 오류가 발생했습니다" });
+  } catch (err) {
+    next(err);
   }
 };

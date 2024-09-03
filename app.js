@@ -2,7 +2,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const path = require('path');
 dotenv.config();
-require('./schedulers/scheduler')
+require('./schedulers/scheduler');
+const errorHandler = require('./middlewares/errorHandler');
 
 const groupRoutes = require('./routes/groupRoutes');
 const postRoutes = require('./routes/postRoutes');
@@ -19,6 +20,8 @@ app.use('/api/groups', groupRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/image', imageRoutes);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
