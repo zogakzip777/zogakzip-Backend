@@ -249,7 +249,7 @@ exports.updatePost = async (req, res, next) => {
     }
 
     // 필수 필드 확인
-    if (!nickname || !title || !content || !postPassword || !groupPassword) {
+    if (!nickname || !title || !content || !postPassword) {
       throw new BadRequestError();
     }
 
